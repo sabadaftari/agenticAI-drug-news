@@ -1,13 +1,18 @@
 import xmltodict
 import requests
-from typing import Any
+from datetime import datetime, timedelta
 
-def fetch_pubmed_articles(query: Any, max_results:int =10):
+def fetch_pubmed_articles(query: str, 
+                          max_results:int =10, 
+                          past_num_days:int=30):
+
+    # query includes the date filter
+    search_query = f"{query} AND (\"last {past_num_days} days\"[dp])"
 
     endpoint = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     params = {
         "db": "pubmed",
-        "term": query,  
+        "term": search_query,  
         "retmode": "xml",
         "retmax": max_results,
     }
@@ -45,18 +50,20 @@ def fetch_pubmed_articles(query: Any, max_results:int =10):
             })
     return articles
 
-# fetch_pubmed_articles("coronary artery disease drug")
+fetch_pubmed_articles("coronary artery disease drug")
 
-from datetime import datetime, timedelta
 
-def fetch_europe_pmc_articles(query, max_results=10, past_num_days=30):
-    # Calculate the date range
+def fetch_europe_pmc_articles(query:str, 
+                              max_results:int=10, 
+                              past_num_days:int=30):
+    
+    # calculate the date range
     end_date = datetime.today().strftime("%Y-%m-%d")
     start_date = (datetime.today() - timedelta(days=past_num_days)).strftime("%Y-%m-%d")
 
     endpoint = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
-    # Query includes the date filter
+    # query includes the date filter
     search_query = f"{query} AND FIRST_PDATE:[{start_date} TO {end_date}]"
     
     params = {
@@ -83,7 +90,8 @@ def fetch_europe_pmc_articles(query, max_results=10, past_num_days=30):
             "doi": item.get("doi", "No DOI available"),
             "url": f"https://europepmc.org/article/{item.get('source', '')}/{item.get('id', '')}"
         })
-    
+
+    # if nothing was found
     if not articles:
         print(f"We have found no articles pulished on Europe PMC during the past {past_num_days}.")
 
