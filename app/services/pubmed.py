@@ -1,10 +1,10 @@
 import xmltodict
 import requests
 from datetime import datetime, timedelta
-
+from typing import List
 def fetch_pubmed_articles(query: str, 
                           max_results:int =10, 
-                          past_num_days:int=30):
+                          past_num_days:int=30) -> List[dict]:
 
     # query includes the date filter
     search_query = f"{query} AND (\"last {past_num_days} days\"[dp])"
@@ -48,14 +48,15 @@ def fetch_pubmed_articles(query: str,
                 "journal": journal,
                 "url": article_url
             })
+    # if nothing was found
+    if not articles:
+        print(f"We have found no articles pulished on PubMed during the past {past_num_days}.")
+
     return articles
-
-fetch_pubmed_articles("coronary artery disease drug")
-
 
 def fetch_europe_pmc_articles(query:str, 
                               max_results:int=10, 
-                              past_num_days:int=30):
+                              past_num_days:int=30) -> List[dict]:
     
     # calculate the date range
     end_date = datetime.today().strftime("%Y-%m-%d")
@@ -63,7 +64,7 @@ def fetch_europe_pmc_articles(query:str,
 
     endpoint = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
-    # query includes the date filter
+    # query includes the time filter
     search_query = f"{query} AND FIRST_PDATE:[{start_date} TO {end_date}]"
     
     params = {
@@ -97,6 +98,51 @@ def fetch_europe_pmc_articles(query:str,
 
     return articles
 
-europe_pmc_results = fetch_europe_pmc_articles("coronary artery disease drug")
+def fetch_new_drug_development_trials(condition, days=30, max_results=10):
+    
+    # Set up the API endpoint and parameters
+    endpoint = "https://clinicaltrials.gov/api/query/study_fields"
+    # Calculate the start date (studies updated after this date)
+    start_date = (datetime.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+    
+    fields = "NCTId,BriefTitle,OverallStatus,LastUpdatePostDate,InterventionName,InterventionType"
+    
+    params = {
+        "expr": condition,
+        "fields": fields,
+        "min_rnk": 1,
+        "max_rnk": max_results,
+        "fmt": "json"
+    }
+    
+    response = requests.get(endpoint, params=params)
+    if response.status_code != 200:
+        print(f"Error: {response.status_code} - {response.text}")
+        return [], None
+    
+    data = response.json()
+    studies = data.get("studies", [])
+    next_page_token = data.get("nextPageToken")
+    
+    results = []
+    for study in studies:
+        identification = study.get("protocolSection", {}).get("identificationModule", {})
+        status = study.get("protocolSection", {}).get("statusModule", {})
+        nct_id = identification.get("nctId", "N/A")
+        title = identification.get("briefTitle", "N/A")
+        overall_status = status.get("overallStatus", "N/A")
+        
+        results.append({
+            "nctId": nct_id,
+            "title": title,
+            "overallStatus": overall_status
+        })
+    
+    return results, next_page_token
+
+# fetch_new_drug_development_trials("cardiovascular disease")
+
+
+
 
 
