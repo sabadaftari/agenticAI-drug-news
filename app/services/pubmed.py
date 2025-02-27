@@ -2,6 +2,8 @@ import xmltodict
 import requests
 from datetime import datetime, timedelta
 from typing import List
+from pytrials.client import ClinicalTrials
+
 def fetch_pubmed_articles(query: str, 
                           max_results:int =10, 
                           past_num_days:int=30) -> List[dict]:
@@ -98,51 +100,56 @@ def fetch_europe_pmc_articles(query:str,
 
     return articles
 
-def fetch_new_drug_development_trials(condition, days=30, max_results=10):
+def fetch_new_drug_development_trials(condition, days=730, max_results=10):
     
-    # Set up the API endpoint and parameters
-    endpoint = "https://clinicaltrials.gov/api/query/study_fields"
-    # Calculate the start date (studies updated after this date)
-    start_date = (datetime.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+    ct = ClinicalTrials()
+
+    # Get 50 full studies related to the condition input.
+    ct.get_full_studies(search_expr=condition, max_studies=max_results) 
+
+    # Get the NCTId, Condition ,Study Title, Interventions and First Posted fields from 1000 studies related to the disease, in csv format.
+    rows = ct.get_study_fields(
+        search_expr=condition,
+        fields=["NCT Number", "Conditions", "Study Title", "Interventions", "First Posted"],
+        max_studies=1000,
+        fmt="csv",
+    ) # to explore more fields options check out pytrial/fields.csv
+
+    fields = [
+        row for row in rows 
+        if len(row) > 3 and row[3] and "DRUG:" in row[3].upper()
+    ] # keep only rows with a DRUG interventions assuming "Interventions" is in index 3
     
-    fields = "NCTId,BriefTitle,OverallStatus,LastUpdatePostDate,InterventionName,InterventionType"
+    drugs_with_date = process_fields(fields,days) # create a list of dictionaries with the drug name and LastUpdatePostDate.
+    return fields, drugs_with_date
+
+def process_fields(fields: str,days:int =730):
+
+    # Calculate the date 30 days ago and today's date in YYYY-MM-DD format.
+    today = datetime.today()
+    start_date = today - timedelta(days=days)
+
     
-    params = {
-        "expr": condition,
-        "fields": fields,
-        "min_rnk": 1,
-        "max_rnk": max_results,
-        "fmt": "json"
-    }
-    
-    response = requests.get(endpoint, params=params)
-    if response.status_code != 200:
-        print(f"Error: {response.status_code} - {response.text}")
-        return [], None
-    
-    data = response.json()
-    studies = data.get("studies", [])
-    next_page_token = data.get("nextPageToken")
-    
-    results = []
-    for study in studies:
-        identification = study.get("protocolSection", {}).get("identificationModule", {})
-        status = study.get("protocolSection", {}).get("statusModule", {})
-        nct_id = identification.get("nctId", "N/A")
-        title = identification.get("briefTitle", "N/A")
-        overall_status = status.get("overallStatus", "N/A")
+    drugs_with_date = []
+    for row in fields:
         
-        results.append({
-            "nctId": nct_id,
-            "title": title,
-            "overallStatus": overall_status
-        })
-    
-    return results, next_page_token
+        drug_name = row[3].split("DRUG:")[-1].strip() # extract the drug name. 
 
-# fetch_new_drug_development_trials("cardiovascular disease")
+        # get the First Posted from the row if available assumed to be at index 4
+        last_update = row[4] if len(row) > 4 else None
 
+        if len(row) > 4 and row[4]: # check if row[4] even exists
+            date_str = row[4]
+            try:
 
+                date_obj = datetime.strptime(date_str, "%Y-%m-%d") # change the string to date format
+                if start_date <= date_obj <= today:
+                    drugs_with_date.append({
+                            "drug_name": drug_name,
+                            "First Posted": last_update
+                        })
+            except Exception as e:
+                print(f"Error parsing date '{date_str}': {e}")
 
-
+    return drugs_with_date
 
