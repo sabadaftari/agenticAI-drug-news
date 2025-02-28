@@ -19,7 +19,7 @@ def summarize_info(system_prompt: str,
         model=OPENAI_MODEL,
         messages=messages,
         temperature=0.7,
-        max_tokens=200
+        max_tokens=600,
     ) # calling 
     
     final_text = response.choices[0].message["content"].strip() # generated text
