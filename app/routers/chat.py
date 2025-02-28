@@ -9,6 +9,8 @@ from services.pubmed import (fetch_pubmed_articles,
 from services.llm import summarize_info
 from services.utils import (process_article_for_summary,
                             select_disease_informed_articles,)
+from services.notification import send_slack_dm, create_gmail_draft
+from config import NOTIFICATION_TYPE
 
 router = APIRouter()
 index = init_pinecone()  # initialize Pinecone index once
@@ -62,9 +64,16 @@ def chat_endpoint(user_input: UserQuery):
     with open("example.txt", "w", encoding="utf-8") as file: 
         file.write(final_response)
         
-    # ---store the conversation in vector databse with conversation ID so we knwo the user.---
+    # --- store the conversation in vector databse with conversation ID so we knwo the user.---
     store_conversation(index, user_query, final_response, conversation_id)
     
+    # --- choose which notification method to use ---
+    notification_type = NOTIFICATION_TYPE.lower()
+    if notification_type == "slack":
+        send_slack_dm(final_response)
+    elif notification_type == "gmail":
+        create_gmail_draft(final_response)
+
     return ChatResponse(
         response=final_response,
         conversation_id=conversation_id
