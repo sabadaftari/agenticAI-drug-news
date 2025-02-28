@@ -58,14 +58,3 @@ def store_conversation(index, user_query: str, bot_response: str, conversation_i
         (user_id, user_emb, {"role": "user", "content": user_query, "conversation_id": conversation_id}),
         (bot_id, bot_emb, {"role": "assistant", "content": bot_response, "conversation_id": conversation_id})
     ])
-
-def query_similar(index, conversation_id: str, query_text: str, top_k: int = 3):
-    query_emb = get_embedding(query_text)
-
-    results = index.query(
-        vector=query_emb,
-        top_k=top_k,
-        include_metadata=True,
-        filter={"conversation_id": {"$eq": conversation_id}}  # Example filter
-    )  
-    return results
