@@ -9,7 +9,7 @@ def fetch_pubmed_articles(query: str,
                           past_num_days:int=30) -> List[dict]:
 
     # query includes the date filter
-    search_query = f"{query} AND (\"last {past_num_days} days\"[dp])"
+    search_query = f"{query.query} AND (\"last {past_num_days} days\"[dp])"
 
     endpoint = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     params = {
