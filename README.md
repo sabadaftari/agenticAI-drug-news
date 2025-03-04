@@ -3,7 +3,7 @@
 This project is a FastAPI-based microservice that acts as an AI-driven assistant. It processes user queries to fetch and summarize external data—such as clinical trial information or pharmaceutical news—and then sends the generated summary as a Slack DM or creates a Gmail draft. The project leverages the following components:
 
 - **OpenAI API**: For generating concise summaries and insights.
-- **Alpha Vantage API**: For retrieving real-time stock market data and news.
+- **Research Publication websites API**: For retrieving real-time data from the literature and clinical trials.
 - **Pinecone**: For storing conversation embeddings and enabling multi-turn memory.
 - **Notification Services**: To send the final summary as either a Slack DM or a Gmail draft.
 
