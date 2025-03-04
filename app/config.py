@@ -9,7 +9,7 @@ EMBEDDING_DIMENSION = 1536
 
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "YOUR_PINECONE_API_KEY")
 PINECONE_ENV = os.getenv("PINECONE_ENV", "us-west4-gcp")  # or your region
-PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "stock-assistant-memory")
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "pharma-assistant-memory")
 
 NOTIFICATION_TYPE = os.getenv("NOTIFICATION_TYPE")
 
