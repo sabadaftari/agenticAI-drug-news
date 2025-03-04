@@ -39,7 +39,7 @@ This project is a FastAPI-based microservice that acts as an AI-driven assistant
 
     # Pinecone configuration
     PINECONE_API_KEY=your_pinecone_api_key_here
-    PINECONE_ENV=us-west4-gcp
+    PINECONE_ENV=us-east-1
     PINECONE_INDEX_NAME=pharma-assistant-memory
     
 4. **Run the Application**
