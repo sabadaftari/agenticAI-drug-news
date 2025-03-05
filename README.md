@@ -43,6 +43,10 @@ This project is a FastAPI-based microservice that acts as an AI-driven assistant
     PINECONE_INDEX_NAME=pharma-assistant-memory
     
 4. **Run the Application**
+    If you are going to make a gmail draft please run the command below first and complete the login flow. so that it saves the authorized credentials (with refresh token, client_id, client_secret, token_uri, etc.) to token.json. If you are using only slack notification then skip to FastAPI server.
+    ```bash
+    python gmail_auth_flow.py
+    ```
     Start the FastAPI server using Uvicorn:
 
     ```bash
@@ -51,6 +55,7 @@ This project is a FastAPI-based microservice that acts as an AI-driven assistant
     or 
     ```bash
     python main.py
+    ```
 
 5. **API Endpoints**
     This endpoint processes a chat query, retrieves relevant data, generates a summary using an LLM, stores the conversation, and sends a notification.You can pass your disease name and conversation ID.
