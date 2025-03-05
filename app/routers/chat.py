@@ -11,6 +11,10 @@ from services.utils import (process_article_for_summary,
                             select_disease_informed_articles,)
 from services.notification import send_slack_dm, create_gmail_draft
 from config import NOTIFICATION_TYPE
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 router = APIRouter()
 index = init_pinecone()  # initialize Pinecone index once
@@ -19,23 +23,31 @@ index = init_pinecone()  # initialize Pinecone index once
 def chat_endpoint(user_input: UserQuery):
     conversation_id = user_input.conversation_id or str(uuid4())
     user_query = user_input.query.strip()
+    logger.info(f"New chat request received with onversation ID: {conversation_id}")
+    logger.debug(f"User query: {user_query}")
 
     # --- fetching all the data needed from APIs. ---
+    logger.info("Fetching PubMed articles...")
     news_data_pubmed = fetch_pubmed_articles(user_input, max_results=200)
     news_data_EUpmc = fetch_europe_pmc_articles(user_input, max_results=200) # to be explored in the future if needed.
+    logger.info("Fetching new drug development clinical trials...")
     new_drug_clinical_trials = fetch_new_drug_development_trials(user_input)
     
     # --- attatch all the parts of the abstracts from relevent articles---
+    logger.info("Selecting disease-informed articles...")
     relevant_articles= select_disease_informed_articles(user_input,news_data_pubmed) #filter new articles for the specific disease
     llm_input=[]
     for r_a in relevant_articles:
         llm_input.append(process_article_for_summary(r_a))
-    
+    logger.debug(f"Processed article summaries: {llm_input}")
+
     # use the top 10 headlines only (adjust as needed)
     news_titles = [article["title"] for article in relevant_articles[:10]]
     short_news_text = "\n".join(news_titles)
+    logger.info(f"Short news text compiled: {short_news_text}")
 
     # --- summarize the News with the LLM ---
+    logger.info("Generating LLM summary...")
     system_prompt = (
         "You are a helpful pharmaceutical assistant with in-depth knowledge of new drug development and clinical trials."
     )
@@ -59,6 +71,7 @@ def chat_endpoint(user_input: UserQuery):
 
     llm_summary = summarize_info(system_prompt, user_prompt)
     final_response = f"{llm_summary}" # convert to string
+    logger.info("LLM summary generated successfully.")
 
     # write the output on a text file
     with open("example.txt", "w", encoding="utf-8") as file: 
@@ -71,8 +84,10 @@ def chat_endpoint(user_input: UserQuery):
     notification_type = NOTIFICATION_TYPE.lower()
     if notification_type == "slack":
         send_slack_dm(final_response)
+        logger.info("Slack DM notification sent.")
     elif notification_type == "gmail":
         create_gmail_draft(final_response)
+        logger.info("Gmail draft notification created.")
 
     return ChatResponse(
         response=final_response,

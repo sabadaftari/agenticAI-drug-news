@@ -44,7 +44,7 @@ def create_gmail_draft(message: str, subject: str = "Drug Development Summary", 
             gmail_credentials_json,
             scopes=["https://www.googleapis.com/auth/gmail.compose"]
         )
-        service = build("gmail", "v1", credentials=creds)
+        service = build("gmail", "v1", credentials=creds, cache_discovery=False)
 
         # create a MIMEText email message
         message_obj = MIMEText(message)
