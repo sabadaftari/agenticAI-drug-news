@@ -17,18 +17,18 @@ This project is a FastAPI-based microservice that acts as an AI-driven assistant
 
 ## Installation
 
-1. **Clone the Repository**
+1. **Clone the Repository**:
 
    ```bash
    git clone https://github.com/your-username/agentic-ai-assistant.git
    cd agentic-ai-assistant
 
-2. **Install Dependencies**
+2. **Install Dependencies**:
 
     ```bash
     pip install -r requirements.txt
 
-3. **Configure Environment Variables**
+3. **Configure Environment Variables**:
     Create a .env file in the root directory with content similar to the following:
 
     ```bash
@@ -42,7 +42,7 @@ This project is a FastAPI-based microservice that acts as an AI-driven assistant
     PINECONE_ENV=us-east-1
     PINECONE_INDEX_NAME=pharma-assistant-memory
     
-4. **Run the Application**
+4. **Run the Application**: 
     If you are going to make a gmail draft please run the command below first and complete the login flow. so that it saves the authorized credentials (with refresh token, client_id, client_secret, token_uri, etc.) to token.json. If you are using only slack notification then skip to FastAPI server.
     ```bash
     python gmail_auth_flow.py
@@ -57,7 +57,7 @@ This project is a FastAPI-based microservice that acts as an AI-driven assistant
     python main.py
     ```
 
-5. **API Endpoints**
+5. **API Endpoints**:
     This endpoint processes a chat query, retrieves relevant data, generates a summary using an LLM, stores the conversation, and sends a notification.You can pass your disease name and conversation ID.
 
     ### POST `/api/chat`
@@ -80,6 +80,6 @@ This project is a FastAPI-based microservice that acts as an AI-driven assistant
             -d "{\"query\": \”Cardiovascular\”, \"conversation_id\": \"e4691926-3e4e-4816-b1b8-d3a455cd0215\"}" \
             http://127.0.0.1:8000/api/chat | jq
 
-**Contributing**
+**Contributing**:
 Contributions are welcome! Please fork the repository and submit a pull request with your improvements.
 If you are a pharmseudical expert and you would like to request some features email me at sabadaftari@gmail.com
