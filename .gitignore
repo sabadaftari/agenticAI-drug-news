@@ -3,6 +3,5 @@ app/services/__pycache__
 app/__pycache__
 app/routers/__pycache__
 example.txt
-app/main0.py
 token.json
 app.log
