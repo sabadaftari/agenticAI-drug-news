@@ -2,6 +2,7 @@
 from uuid import uuid4
 from pinecone import Pinecone, ServerlessSpec
 import openai
+import logging
 
 from config import (
     PINECONE_API_KEY,
@@ -9,6 +10,9 @@ from config import (
     PINECONE_INDEX_NAME,
     EMBEDDING_DIMENSION
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Lazy-load the embedding model
 _index = None
@@ -26,11 +30,13 @@ def init_pinecone():
 
     global _index
     if _index is None:        
+        logger.info("Initializing Pinecone...")
         pc = Pinecone(
             api_key=PINECONE_API_KEY
         )
 
         if PINECONE_INDEX_NAME not in pc.list_indexes().names():
+            logger.info(f"Creating Pinecone index: {PINECONE_INDEX_NAME}")
             pc.create_index(
                 name=PINECONE_INDEX_NAME, 
                 dimension=EMBEDDING_DIMENSION, 
