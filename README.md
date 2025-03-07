@@ -56,6 +56,10 @@ This project is a FastAPI-based microservice that acts as an AI-driven assistant
     ```bash
     python main.py
     ```
+    if you are using docker to run the app, start with the commands below after you made an image:
+    ```bash
+    docker run -p 8000:8000 name_of_image
+    ```
 
 5. **API Endpoints**:
     This endpoint processes a chat query, retrieves relevant data, generates a summary using an LLM, stores the conversation, and sends a notification.You can pass your disease name and conversation ID.
