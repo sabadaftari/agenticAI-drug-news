@@ -1,0 +1,12 @@
+fastapi==0.95.1
+uvicorn==0.22.0
+requests==2.30.0
+pydantic==1.10.7
+torch==2.0.0
+pinecone-client==5.0.1
+python-dotenv==1.0.0
+openai==0.27.0
+google-api-python-client==2.162.0
+slack_sdk==3.34.0
+xmltodict==0.13.0
+pytrials==1.0.0
