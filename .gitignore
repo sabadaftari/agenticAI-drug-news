@@ -1,7 +1,7 @@
-.env
+app/.env
 app/services/__pycache__
 app/__pycache__
 app/routers/__pycache__
 example.txt
-token.json
+app/token.json
 app.log
